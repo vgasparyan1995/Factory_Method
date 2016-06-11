@@ -1,62 +1,53 @@
 #pragma once
 
-#include <map>
-#include <vector>
-#include <memory>
+#include <iostream>
 
-class Orchestre;
-
-enum class instrument : unsigned char
+enum class instrument
 {
     PIANO,
     ORGAN
 };
 
-class Orchestre
+class musician
 {
 public:
-    class musician
-    {
-    public:
-        virtual ~musician() {}
-        virtual void play() const = 0;
-        virtual musician* clone() const = 0;
-    };
+    static musician* create_musician(const instrument i);
 
-private:
-    class pianist : public musician
-    {
-    public:
-        pianist() {}
-        void play() const override;
-        virtual pianist* clone() const override;
-    };
-
-    class organist : public musician
-    {
-    public:
-        organist() {}
-        void play() const override;
-        virtual organist* clone() const override;
-    };
-
-public:
-    std::unique_ptr<musician> create_musician(const instrument i);
-
-private:
-    std::map<instrument, musician*> m_musicians;
-
-public:
-    static Orchestre* get_instance();
-    static void remove_instance();
-
-private:
-    static Orchestre* s_instance;
-
-private:
-    Orchestre();
-    ~Orchestre();
-    Orchestre(const Orchestre&) = delete;
-    Orchestre& operator=(const Orchestre&) = delete;
+    virtual ~musician() {}
+    virtual void play() const = 0;
 };
 
+class pianist : public musician
+{
+public:
+    void play() const override
+    {
+        std::cout << "piano" << std::endl;
+    }
+
+    pianist() {}
+};
+
+class organist : public musician
+{
+public:
+    void play() const override
+    {
+        std::cout << "organ" << std::endl;
+    }
+
+    organist() {}
+};
+
+musician* musician::create_musician(const instrument i)
+{
+    switch (i) {
+        case instrument::PIANO:
+            return new pianist();
+        case instrument::ORGAN:
+            return new organist();
+        default:
+            throw "WTF?";
+    }
+    return nullptr;
+}
